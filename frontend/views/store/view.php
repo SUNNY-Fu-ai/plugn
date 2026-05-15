@@ -80,7 +80,18 @@ $this->params['breadcrumbs'][] = $this->title;
                             'attribute' => 'instagram_url',
                             'format' => 'html',
                             'value' => function ($data) {
-                                return '<a  href="' . $data->instagram_url .'">'. $data->instagram_url  .'</a>';
+                                $url = trim((string) $data->instagram_url);
+                                $label = Html::encode($url);
+                                $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
+                                if (!in_array($scheme, ['http', 'https'], true)) {
+                                    return $label;
+                                }
+
+                                return Html::a($label, $url, [
+                                    'target' => '_blank',
+                                    'rel' => 'noopener noreferrer',
+                                ]);
                             },
                             'visible' => $model->instagram_url != null,
                         ],
