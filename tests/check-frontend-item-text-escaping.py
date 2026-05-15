@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 from pathlib import Path
 
 
@@ -14,49 +15,97 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def matches(pattern: str, source: str) -> bool:
+    return re.search(pattern, source, re.DOTALL) is not None
+
+
 index = read("frontend/views/item/index.php")
 inventory = read("frontend/views/item/inventory.php")
 view = read("frontend/views/item/view.php")
 
 require(
-    "'attribute' => 'item_name',\n                           'label' => 'Item name',\n                           'format' => 'text'"
-    in index,
+    matches(
+        r"'attribute'\s*=>\s*'item_name'\s*,\s*'label'\s*=>\s*'Item name'\s*,\s*'format'\s*=>\s*'text'",
+        index,
+    ),
     "item index must render item_name as escaped text",
 )
 require(
-    "'attribute' => 'sku',\n                    'label' => 'SKU',\n                    'format' => 'text'"
-    in index,
+    matches(
+        r"'attribute'\s*=>\s*'sku'\s*,\s*'label'\s*=>\s*'SKU'\s*,\s*'format'\s*=>\s*'text'",
+        index,
+    ),
     "item index must render sku as escaped text",
 )
 require(
-    "'label' => 'Category name'" in index and "'format' => 'text'" in index,
+    matches(
+        r"'label'\s*=>\s*'Category name'.*?'format'\s*=>\s*'text'",
+        index,
+    ),
     "item index category names must render as escaped text",
 )
 require(
-    "'label' => 'Item name',\n                    'format' => 'text',\n                    'attribute' => 'item_name'"
-    in inventory,
+    matches(
+        r"'label'\s*=>\s*'Item name'\s*,\s*'format'\s*=>\s*'text'\s*,\s*'attribute'\s*=>\s*'item_name'",
+        inventory,
+    ),
     "inventory item_name must render as escaped text",
 )
 require(
-    "'format' => 'text',\n                    'attribute' => 'sku'" in inventory,
+    matches(
+        r"'format'\s*=>\s*'text'\s*,\s*'attribute'\s*=>\s*'sku'",
+        inventory,
+    ),
     "inventory sku must render as escaped text",
 )
+
+category_start = view.find("'attribute' => 'category_item'")
+category_end = view.find("'attribute' => 'item_price'", category_start)
 require(
-    "'attribute' => 'category_item'" in view and "'format' => 'text'" in view,
+    category_start != -1,
+    "item detail category_item marker must exist",
+)
+require(
+    category_end != -1,
+    "item detail item_price marker must exist",
+)
+category_block = view[category_start:category_end]
+
+require(
+    matches(
+        r"'attribute'\s*=>\s*'category_item'.*?'format'\s*=>\s*'text'",
+        category_block,
+    ),
     "item detail category names must render as escaped text",
 )
 
-for disallowed, source, message in [
-    ("'attribute' => 'item_name',\n                           'label' => 'Item name',\n                           'format' => 'html'", index, "item index item_name must not render as html"),
-    ("'attribute' => 'sku',\n                    'label' => 'SKU',\n                    'format' => 'raw'", index, "item index sku must not render as raw"),
-    ("'label' => 'Item name',\n                    'format' => 'raw',\n                    'attribute' => 'item_name'", inventory, "inventory item_name must not render as raw"),
-    ("'format' => 'raw',\n                    'attribute' => 'sku'", inventory, "inventory sku must not render as raw"),
-    ("'attribute' => 'category_item'", view[view.find("'attribute' => 'category_item'") : view.find("'attribute' => 'item_price'")], "item detail category block must exist"),
-    ("'format' => 'raw'", view[view.find("'attribute' => 'category_item'") : view.find("'attribute' => 'item_price'")], "item detail category names must not render as raw"),
+for disallowed_pattern, source, message in [
+    (
+        r"'attribute'\s*=>\s*'item_name'\s*,\s*'label'\s*=>\s*'Item name'\s*,\s*'format'\s*=>\s*'html'",
+        index,
+        "item index item_name must not render as html",
+    ),
+    (
+        r"'attribute'\s*=>\s*'sku'\s*,\s*'label'\s*=>\s*'SKU'\s*,\s*'format'\s*=>\s*'raw'",
+        index,
+        "item index sku must not render as raw",
+    ),
+    (
+        r"'label'\s*=>\s*'Item name'\s*,\s*'format'\s*=>\s*'raw'\s*,\s*'attribute'\s*=>\s*'item_name'",
+        inventory,
+        "inventory item_name must not render as raw",
+    ),
+    (
+        r"'format'\s*=>\s*'raw'\s*,\s*'attribute'\s*=>\s*'sku'",
+        inventory,
+        "inventory sku must not render as raw",
+    ),
+    (
+        r"'format'\s*=>\s*'raw'",
+        category_block,
+        "item detail category names must not render as raw",
+    ),
 ]:
-    if message.endswith("must exist"):
-        require(disallowed in source, message)
-    else:
-        require(disallowed not in source, message)
+    require(not matches(disallowed_pattern, source), message)
 
 print("frontend item text escaping checks passed")
