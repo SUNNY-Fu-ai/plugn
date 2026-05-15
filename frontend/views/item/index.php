@@ -95,12 +95,12 @@ $this->registerJs($js);
                 [
                         'attribute' => 'item_name',
                            'label' => 'Item name',
-                           'format' => 'html'
+                           'format' => 'text'
                 ],
                 [
                     'attribute' => 'sku',
                     'label' => 'SKU',
-                    'format' => 'raw'
+                    'format' => 'text'
                 ],
                 [
                     'label' => 'Category name',
@@ -120,7 +120,7 @@ $this->registerJs($js);
 
                         return $categoryName;
                     },
-                    'format' => 'raw'
+                    'format' => 'text'
                 ],
 
                 'unit_sold',

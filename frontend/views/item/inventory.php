@@ -57,11 +57,11 @@ $this->registerJs($js);
                 ],
                 [
                     'label' => 'Item name',
-                    'format' => 'raw',
+                    'format' => 'text',
                     'attribute' => 'item_name',
                 ],
                 [
-                    'format' => 'raw',
+                    'format' => 'text',
                     'attribute' => 'sku'
                 ],
                 [

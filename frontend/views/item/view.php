@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 return $itemCategoryValues;
                             },
-                            'format' => 'raw'
+                            'format' => 'text'
                         ],
                         [
                             'attribute' => 'item_price',
