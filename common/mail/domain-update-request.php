@@ -1,5 +1,7 @@
 <?php
 
+use yii\helpers\Html;
+
 /* @var $this yii\web\View */
 /* @var $signupForm common\models\ContactForm */
 
@@ -176,7 +178,7 @@ Hello Big Boss,  <br/><br/>
               <td align="center" style="font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:6px;word-break:break-word;">
 
       <div style="font-family:Proxima Nova, Arial, Arial, Helvetica, sans-serif;font-size:21px;line-height:24px;text-align:center;color:#000000;">
-        <b><?= strtoupper($store_name) ?></b> changed their domain name recently.  <br/><br/>
+        <b><?= Html::encode(strtoupper($store_name)) ?></b> changed their domain name recently.  <br/><br/>
       </div>
 
               </td>
@@ -188,8 +190,8 @@ Hello Big Boss,  <br/><br/>
                   <div style="font-family:Proxima Nova, Arial, Arial, Helvetica, sans-serif;font-size:15px;line-height:24px;text-align:center;color:#000000;">
 
                     The previous name and the recent name are listed below: <br/> <br/>
-                    Previous: <?= $old_domain ?> <br/>
-                    New: <?= $new_domain ?>
+                    Previous: <?= Html::encode($old_domain) ?> <br/>
+                    New: <?= Html::encode($new_domain) ?>
 
                   </div>
 
